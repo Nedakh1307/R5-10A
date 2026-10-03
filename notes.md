@@ -8,3 +8,7 @@
 
 **Q4.** Sur le TP oui,c'est un environnement local avec des données de test, personne d'autre n'y accède. 
 Sur un serveur de production non ,n'importe qui qui a accès au fichier voit les mots de passe il faudrait les mettre dans des variables d'environnement ou un gestionnaire de secrets.
+
+## Étape 2 — Démarrage
+
+**Q5.** `docker compose exec` lance une commande dans un conteneur qui tourne déjà, la commande `redis-cli` s'exécute donc à l'intérieur du conteneur Redis, pas sur ma machine (je n'ai pas besoin d'installer redis-cli).
