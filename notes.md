@@ -12,3 +12,9 @@ Sur un serveur de production non ,n'importe qui qui a accès au fichier voit les
 ## Étape 2 — Démarrage
 
 **Q5.** `docker compose exec` lance une commande dans un conteneur qui tourne déjà, la commande `redis-cli` s'exécute donc à l'intérieur du conteneur Redis, pas sur ma machine (je n'ai pas besoin d'installer redis-cli).
+
+## Étape 3 — Application
+
+**Q6.** Docker ouvre le port 15432 sur ma machine et le redirige vers le port 5432 du conteneur. Donc pour mon application la base est accessible sur localhost:15432.
+
+**Q7.** Non, les joueurs ne sont pas dupliqués, dans Program.cs la condition `if (!db.Players.Any())` n'ajoute les joueurs que si la table est vide, au deuxième lancement elle contient déjà les 3 joueurs donc rien n'est ajouté.
