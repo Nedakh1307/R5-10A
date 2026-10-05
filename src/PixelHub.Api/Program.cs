@@ -56,4 +56,7 @@ app.MapGet("/games/genre/{genre}", async (string genre, IGameCatalog catalog) =>
 app.MapGet("/games/top/{count:int}", async (int count, IGameCatalog catalog) =>
     await catalog.GetTopRatedAsync(count));
 
+app.MapGet("/games/stats", async (IGameCatalog catalog) =>
+    await catalog.GetStatsByGenreAsync());
+
 app.Run();
