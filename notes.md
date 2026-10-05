@@ -1,3 +1,4 @@
+## TP1
 ## Étape 1 — Lecture
 
 **Q1.** Le fichier sert pour tout le module,à chaque séance on ajoute un moteur de base de données à l'application comme ça tout est déjà prêt et on ne reconfigure rien. Pour aujourd'hui on n'utilise que PostgreSQL.
@@ -20,3 +21,25 @@ Sur un serveur de production non ,n'importe qui qui a accès au fichier voit les
 **Q7.** Non, les joueurs ne sont pas dupliqués, dans Program.cs la condition `if (!db.Players.Any())` n'ajoute les joueurs que si la table est vide, au deuxième lancement elle contient déjà les 3 joueurs donc rien n'est ajouté.
 
 ## Étape 4 — Arrêt
+
+
+## TP2
+## Étape 1 
+
+**Q1.** Le `_id` est fabriqué par l'outil qui envoie les documents (mongoimport ou le driver) pas par le serveur MongoDB. Au TP1 l'Id 4 de Pixel était choisi par PostgreSQL au moment de l'insertion donc on ne le connaissait qu'après.
+
+
+**Q2.** En SQL normalisé il faudrait une table de liaison `jeu_plateforme` et un `JOIN` avec `WHERE plateforme = 'Switch'`. 
+En MongoDB, la valeur est directement dans le tableau donc la requête est plus simple.
+
+**Q3.** Le compte `pixelhub` est créé dans la base `admin`pas dans la base `pixelhub`, sans `--authenticationDatabase admin`MongoDB cherche le compte au mauvais endroit et refuse la connexion.
+
+**Q4.** C'est pratique au début mais c'est un problème à 4 développeurs sur 6 mois : 
+chacun invente ses champs avec des noms ou des formats différents et les documents deviennent incohérents. Personne ne contrôle rien et on ne sait plus quels champs existent.
+
+**Q5.** on s'attend à une erreur `Jeux` n'est pas `jeux` parce que MongoDB est sensible à la casse, il cherche dans une collection `Jeux` qui n'existe pas et renvoie un résultat vide sans erreur car une collection inexistante n'est pas considérée comme une faute.
+
+**Q6.**MongoInvalidArgumentError: Update document requires atomic operators
+MongoDB refuse parce que `updateOne` attend des opérateurs comme `$set` ce qui évite d'écraser tout le document par erreur, pour remplacer vraiment le document en entier on utilise `replaceOne`.
+
+**Q7.** En SQL il faudrait `ALTER TABLE jeux ADD COLUMN nbVotes int;`, toutes les autres lignes auraient aussi cette colonne avec la valeur `NULL`.
