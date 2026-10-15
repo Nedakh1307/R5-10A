@@ -74,3 +74,31 @@ tattou@debian1:~/Bureau/Neda/BUT3_S5/r5.10/r5.10$ curl http://localhost:5199/gam
 [{"id":{"timestamp":1791201897,"creationTime":"2026-10-05T12:04:57Z"},"titre":"Baldur's Gate 3","genre":"RPG","note":4.9,"anneeSortie":2023,"plateformes":["PC","PS5","Xbox Series"],"tags":["narratif","tour par tour","coopératif"],"specifiques":{"nombreClasses":12,"dureeCampagneHeures":75,"choixNarratifs":true}},{"id":{"timestamp":1791201897,"creationTime":"2026-10-05T12:04:57Z"},"titre":"Stardew Valley","genre":"Simulation","note":4.8,"anneeSortie":2016,"plateformes":["PC","Switch","PS5","Mobile"],"tags":["pixel art","détente","coopératif"],"specifiques":{"nombreSaisons":4,"coop":true,"joueursMax":4}},{"id":{"timestamp":1791201897,"creationTime":"2026-10-05T12:04:57Z"},"titre":"Terraria","genre":"Bac à sable","note":4.7,"anneeSortie":2011,"plateformes":["PC","Switch","PS5","Mobile"],"tags":["exploration","construction","coopératif","sandbox"],"specifiques":{"joueursMax":8,"mondesInfinis":true}}]
 
 ## Étape 3
+
+**Q12.**
+```sql
+SELECT genre, AVG(note) AS note_moyenne, COUNT(*) AS nombre
+FROM jeux
+GROUP BY genre
+ORDER BY note_moyenne DESC;
+```
+Les deux requêtes font la même chose elles regroupent par genre,calculent la moyenne et le nombre de jeux.
+
+
+# TP3
+
+## Partie 1 : redis-cli
+
+**Q1.** Atomique = l'opération se fait d'un seul bloc, personne ne peut s'intercaler au milieu. Si mille joueurs terminent une partie en même temps, tous les +1 sont comptés, aucun n'est perdu. En SQL, `UPDATE ... SET n = n + 1` est aussi atomique, mais si on fait un SELECT puis un UPDATE, deux requêtes peuvent lire la même valeur et on perd un incrément. La différence : Redis le fait nativement et très vite, SQL passe par des verrous et une transaction.
+
+**Q2.** Il faudrait : lire le JSON (GET), le désérialiser, ajouter 250 à xp, le resérialiser, puis le réécrire (SET). Si deux requêtes le font en même temps, elles lisent la même ancienne valeur et la dernière écrase l'autre : une mise à jour est perdue. `HINCRBY` fait tout ça en une seule opération atomique.
+
+**Q3.** `ZRANGE` trie du plus petit score au plus grand, `ZREVRANGE` du plus grand au plus petit. Pour un top 3, j'utilise `ZREVRANGE`.
+
+**Q4.** `ZREVRANK` renvoie un index qui commence à 0. Le meilleur joueur verrait « 0e ». Il faut ajouter 1 avant l'affichage.
+
+**Q5.** `LPUSH` ajoute à gauche et `RPOP` retire à droite, donc c'est Nova (la première arrivée) qui sort : c'est une file FIFO. `LPOP` aurait sorti Ombre (la dernière arrivée) : ce serait une pile (LIFO), pas juste pour du matchmaking.
+
+**Q6.** Juste après le SET : TTL vaut environ 30 et EXISTS vaut 1. Après 30 secondes : TTL vaut -2 et EXISTS vaut 0. Sur une clé sans expiration (`compteur:parties`), TTL vaut -1. Donc : nombre positif = secondes restantes, -1 = la clé existe sans expiration, -2 = la clé n'existe pas.
+
+**Q7.** Il faudrait une colonne date d'expiration et une tâche planifiée qui fait `DELETE ... WHERE expire_at < now()`. Risques : la tâche plante ou est oubliée, les lignes expirées restent visibles entre deux passages si on ne filtre pas, et la tâche charge la base.
