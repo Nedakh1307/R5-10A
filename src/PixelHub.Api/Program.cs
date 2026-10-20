@@ -37,6 +37,14 @@ builder.Services.AddSingleton<IGameCatalog>(sp =>
 
 var app = builder.Build();
 
+app.MapGet("/games/timed", async (IGameCatalog catalog) =>
+{
+    var chrono = System.Diagnostics.Stopwatch.StartNew();
+    var jeux = await catalog.GetAllAsync();
+    chrono.Stop();
+    return new { nombre = jeux.Count, millisecondes = chrono.Elapsed.TotalMilliseconds };
+});
+
 // Crée la base et les tables au démarrage.
 // Suffisant en TP ; dans un vrai projet, on utilise les migrations EF Core.
 using (var scope = app.Services.CreateScope())
