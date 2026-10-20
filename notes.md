@@ -102,3 +102,10 @@ Les deux requêtes font la même chose elles regroupent par genre,calculent la m
 **Q6.** Juste après le SET : TTL vaut environ 30 et EXISTS vaut 1. Après 30 secondes : TTL vaut -2 et EXISTS vaut 0. Sur une clé sans expiration (`compteur:parties`), TTL vaut -1. Donc : nombre positif = secondes restantes, -1 = la clé existe sans expiration, -2 = la clé n'existe pas.
 
 **Q7.** Il faudrait une colonne date d'expiration et une tâche planifiée qui fait `DELETE ... WHERE expire_at < now()`. Risques : la tâche plante ou est oubliée, les lignes expirées restent visibles entre deux passages si on ne filtre pas, et la tâche charge la base.
+
+## Partie 2 :
+**Q8.** Un `ConnectionMultiplexer` gère la connexion à Redis et la partage entre toutes les requêtes. Il est fait pour être créé une seule fois. Si on en créait un par requête, on ouvrirait trop de connexions (lent, et on finit par saturer Redis). Le bug est invisible en TP car on est seul à tester, avec très peu de requêtes.
+
+**Q9.** Sans `Order.Descending`, `/leaderboard/top/5` affiche les plus mauvais scores en premier (Pixel, 1800, devant Ombre, 10200). Ce n'est pas visiblement faux : la réponse est bien formée, sans erreur, avec de vrais joueurs et de vrais scores. Ce bug est dangereux car le code compile et renvoie un 200, mais le classement est à l'envers, et on ne le remarque qu'en regardant les valeurs.
+
+**Q12.** J'ai modifié 0 ligne dans les endpoints. Ils dépendent de l'interface `IGameCatalog`, pas de `MongoGameCatalog` : j'ai juste changé l'enregistrement dans `Program.cs` pour injecter `CachedGameCatalog`, qui implémente la même interface. C'est le choix de la séance 2 (passer par une interface / injection de dépendances) qui rend cela possible.
